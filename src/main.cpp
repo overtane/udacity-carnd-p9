@@ -5,7 +5,7 @@
 #include <math.h>
 #include <chrono>
 
-double Kp = 2.0;
+double Kp = 0.5;
 double Kd = 0.5;
 double Ki = 0.0;
 int debug = 0;
@@ -65,15 +65,13 @@ int main(int argc, char* argv[])
 {
   uWS::Hub h;
 
+  // parse command line options
   parse_arguments(argc, argv);
   std::cout.flags(std::ios::right | std::ios::showpos);
 
+  // create and initialize controller
   PID::Parameters K = {Kp, Kd, Ki};
   PID pid(K, debug);
-
-  int n_meas = 0;
-  double avg_cte = 0.0;
-
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -87,13 +85,16 @@ int main(int argc, char* argv[])
         std::string event = j[0].get<std::string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
+	  // NOTE: sign of CTE might change
           double cte = -1.0 *std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
+	  
+	  // Calculate steering value and limit it between [-0.5, 0,5] 
           double steer_value = pid.Control(cte);
-
           steer_value = (steer_value > .5) ? .5 : (steer_value < -.5) ? -.5 : steer_value;
           
+	  // Output CTE, steering value and average error
           std::cout << std::fixed << std::setprecision(3) << cte << "\t " << steer_value << "\t" << pid.AvgError() << std::endl;
 
           json msgJson;
