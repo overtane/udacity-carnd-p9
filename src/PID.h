@@ -1,46 +1,44 @@
 #ifndef PID_H
 #define PID_H
 
+#include "Timestamp.h"
+
 class PID {
+
 public:
-  /*
-  * Errors
-  */
-  double p_error;
-  double i_error;
-  double d_error;
 
-  /*
-  * Coefficients
-  */ 
-  double Kp;
-  double Ki;
-  double Kd;
+  typedef double Parameters[3];
 
-  /*
-  * Constructor
-  */
-  PID();
+  /**
+   * Constructor
+   */
+  PID(const PID::Parameters &, int);
 
-  /*
-  * Destructor.
-  */
+  /**
+   * Destructor.
+   */
   virtual ~PID();
 
-  /*
-  * Initialize PID.
-  */
-  void Init(double Kp, double Ki, double Kd);
+  /**
+   *  Given a cross track error and time delta, calculate controlled output
+   */
+  double Control(double cte);
 
-  /*
-  * Update the PID error variables given cross track error.
-  */
-  void UpdateError(double cte);
+  double AvgError();
 
-  /*
-  * Calculate the total PID error.
-  */
-  double TotalError();
+ private:
+
+  PID();
+
+  const PID::Parameters K_; // controller coefficiens
+
+  int debug_;
+
+  double prev_cte_;     // previous cte 
+  double int_cte_;      // integrated cte
+  int n_meas_;          // number of measurements
+  double avg_cte_;      // average error
+  Timestamp prev_time_; // time of previous cte
 };
 
 #endif /* PID_H */
