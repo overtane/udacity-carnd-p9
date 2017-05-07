@@ -5,9 +5,9 @@
 #include <math.h>
 #include <chrono>
 
-double Kp = 0.5;
-double Kd = 0.5;
-double Ki = 0.0;
+double Kp = 0.2;
+double Kd = 0.1;
+double Ki = 0.01;
 int debug = 0;
 
 void usage(void) {}
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         if (event == "telemetry") {
           // j[1] is the data JSON object
 	  // NOTE: sign of CTE might change
-          double cte = -1.0 *std::stod(j[1]["cte"].get<std::string>());
+          double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
 	  
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = 0.6;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           if (debug)
 	      std::cout << msg << std::endl;
