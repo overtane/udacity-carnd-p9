@@ -13,8 +13,8 @@ public:
     virtual ~Timestamp() {}
 
     double diff(Timestamp &t2) {
-        std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(t_ - t2.t_);
-	return diff.count();
+      std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(t_ - t2.t_);
+      return diff.count();
     }
 
 };

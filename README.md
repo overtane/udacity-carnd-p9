@@ -2,16 +2,50 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ---
+## Code structure
+* src/Timestamp.h: simple timestamp class. Timestamp is taken at object instantiation time. diff() method exists for comparing timestamps.
+* PID.cpp, PID.h: PID controller code for calculating new steering wheel angle from the latest cross track error (CTE). Calculation takes into account the time difference of samples.
+* main.cpp: reading drive status values (CTE, speed) from [the Udacity SDC simulator](https://github.com/udacity/self-driving-car-sim), and feeds back the calculated steering wheel angle and throttle values. In this version, throttle is always constant 0.6.
+
+## Running the Program
+
+The program can take four arguments:
+* -p <double>: proportional term coeffient 
+* -d <double>: derivative term coefficient
+* -i <double>: integral term coefficient
+* -D: debug output, get more output from processing
+
+After starting the pid-program, start the Udacity simulator and select autonomous mode. For each data sample, program outputs three values: cross track error, calculated steering wheel angle, and running average of the CTE. With -D argument one gets additional output.
+
+## About the Controller
+
+Control is achieved using proportional (P), derivative (D) and integral (I) terms. The P term counteracts the current and latest measured error value. This easily leads to overshooting the setpoint and a plain P-controller typically oscillates. To mitigate this behavior we use the derivate term, which predicts the future trend of the error and minimizes it over the time. The integral term sums up the past trends of the error, and can detect and correct possible constant drift in streering.   
+
+The behavior of different controllers can be easily tested by zeroing program arguments. For example:
+
+* PID-controller: `./pid -p 0.2 -d 0.1 -i 0.1`
+* P-controller:   `./pid -p 0.2 -d 0 -i 0`
+* PD-controller:  `./pid -p 0.2 -d 0.1 -i 0`
+* PI-controller:  `./pid -p 0.2 -d 0 -i 0.1`
+
+Default values for coefficients  are  p == 0.2, d == 0.1 and i == 0.1. *Car passes the test track when these values are used*. The values have been found by manual tuning with the SDC simulator. The car passes the track equally well without the integral factor, but the average CTE remains rather high. When using the I-term, the average CTE goes close to zero.
+
+## Experimenting
+
+One can use `PIDControl.ipynb` jupyter notebook for experimenting with the controller. The notebook also contains a twiddle algorithm for finding optimal values for coeffients. This image. generated with the notebook code, illustrates error values from different kind of controllers:
+
+![PID](PID.png?raw=true "Output from different controllers") 
+
 
 ## Dependencies
 
 * cmake >= 3.5
  * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1
+* make >= 3.81
   * Linux: make is installed by default on most Linux distros
   * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
   * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
+* gcc/g++ >= 4.2.1
   * Linux: gcc / g++ is installed by default on most Linux distros
   * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
   * Windows: recommend using [MinGW](http://www.mingw.org/)
@@ -27,58 +61,3 @@ Self-Driving Car Engineer Nanodegree Program
 3. Compile: `cmake .. && make`
 4. Run it: `./pid`. 
 
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/12dd29d8-2755-4b1b-8e03-e8f16796bea8)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./

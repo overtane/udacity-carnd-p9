@@ -17,23 +17,23 @@ void parse_arguments(int argc, char* argv[]) {
     int opt;
 
     while ((opt = getopt(argc, argv, "p:i:d:D")) != -1) {
-        switch (opt) {
+      switch (opt) {
         case 'i':
-	    Ki = atof(optarg);
-            break;
+          Ki = atof(optarg);
+          break;
         case 'd':
-	    Kd = atof(optarg);
-            break;
+          Kd = atof(optarg);
+          break;
         case 'p':
-	    Kp = atof(optarg);
-            break;
-	case 'D':
-	    debug++;
-	    break;
+          Kp = atof(optarg);
+          break;
+        case 'D':
+          debug++;
+          break;
         default: /* '?' */
-	    usage();
-            exit(EXIT_FAILURE);
-        }
+          usage();
+          exit(EXIT_FAILURE);
+      }
     }
 }
 
@@ -85,16 +85,15 @@ int main(int argc, char* argv[])
         std::string event = j[0].get<std::string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
-	  // NOTE: sign of CTE might change
           double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
-	  
-	  // Calculate steering value and limit it between [-0.5, 0,5] 
+      
+          // Calculate steering value and limit it between [-0.5, 0,5] 
           double steer_value = pid.Control(cte);
           steer_value = (steer_value > .5) ? .5 : (steer_value < -.5) ? -.5 : steer_value;
           
-	  // Output CTE, steering value and average error
+          // Output CTE, steering value and average error
           std::cout << std::fixed << std::setprecision(3) << cte << "\t " << steer_value << "\t" << pid.AvgError() << std::endl;
 
           json msgJson;
@@ -102,7 +101,7 @@ int main(int argc, char* argv[])
           msgJson["throttle"] = 0.6;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           if (debug)
-	      std::cout << msg << std::endl;
+          std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
